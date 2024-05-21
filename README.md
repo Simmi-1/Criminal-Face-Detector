@@ -1,4 +1,5 @@
-<b>#Team bit2byte++ presents: Criminal Face Detector<b>
+<b>#Team bit2byte++ presents: Criminal Face Detector</b>
+<br>
 Guys, check this project is live and crazy.
 We're bringing the world of tech and security investigation like never ever before!
 
