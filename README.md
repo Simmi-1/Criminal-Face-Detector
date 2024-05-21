@@ -1,4 +1,4 @@
-# bit2byte++ presents: Criminal Face Detector
+#Team bit2byte++ presents: Criminal Face Detector
 Guys, check this project is live and crazy.
 We're bringing the world of tech and security investigation like never ever before!
 
@@ -12,10 +12,13 @@ Upon detecting the face, the controller enables the camera for capturing the eve
 
 CRMINAL NOT DETECTED:
 When the known image in our database or record is not matched with the human in the camera, it will then detect that the criminal not matched
+![notcriminal](https://github.com/Simmi-1/Criminal-Face-Detector/assets/165306390/90df8628-d441-448e-9219-491ba81ed39a)
+
 
 
 CRIMINAL DETECTED:
 When the known image in our database or record is matched with the human in the camera, it will produce an alarm and alert the user.
+![crminal](https://github.com/Simmi-1/Criminal-Face-Detector/assets/165306390/30cb7718-57c1-44c2-8324-de1ad5c472bf)
 
 
 We have use 5 Python Libraries:
