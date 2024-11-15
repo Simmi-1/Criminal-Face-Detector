@@ -1,9 +1,8 @@
 import cv2
-import face_recognition
 import numpy as np
-from tensorflow.keras.applications import MobileNetV2 # type: ignore
-from tensorflow.keras.applications.mobilenet_v2 import preprocess_input, decode_predictions # type: ignore
-from tensorflow.keras.preprocessing import image # type: ignore
+from tensorflow.keras.applications import MobileNetV2
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input, decode_predictions
+from tensorflow.keras.preprocessing import image
 from PIL import Image
 import winsound
 
@@ -22,13 +21,29 @@ def predict_image(img_array):
     preds = model.predict(img_array)
     return decode_predictions(preds, top=3)[0]
 
+def prepare_training_data(known_image_path):
+    """Prepare training data for the recognizer."""
+    known_image = cv2.imread(known_image_path)
+    gray_known_image = cv2.cvtColor(known_image, cv2.COLOR_BGR2GRAY)
+    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+    faces = face_cascade.detectMultiScale(gray_known_image, scaleFactor=1.1, minNeighbors=5)
+    if len(faces) == 0:
+        raise ValueError("No face detected in the image")
+    x, y, w, h = faces[0]
+    return gray_known_image[y:y+h, x:x+w], 1
+
 def main():
-    # Load a known image and get the encoding
-    known_image = face_recognition.load_image_file('tanu.jpg')
-    known_encoding = face_recognition.face_encodings(known_image)[0]
+    # Prepare the training data
+    known_image_path = './python/tanu.png'
+    face, label = prepare_training_data(known_image_path)
+    recognizer = cv2.face.LBPHFaceRecognizer_create()
+    recognizer.train([face], np.array([label]))
 
     # Initialize the video capture
     video_capture = cv2.VideoCapture(0)
+
+    # Load OpenCV's pre-trained face detector
+    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
     while True:
         ret, frame = video_capture.read()
@@ -36,19 +51,22 @@ def main():
             print("Failed to grab frame")
             break
 
-        face_locations = face_recognition.face_locations(frame)
-        face_encodings = face_recognition.face_encodings(frame, face_locations)
+        gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        faces = face_cascade.detectMultiScale(gray_frame, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
-        for face_encoding in face_encodings:
-            matches = face_recognition.compare_faces([known_encoding], face_encoding)
-            name = "criminal not detected"
-
-            # Check the first match
-            if matches[0]:
+        for (x, y, w, h) in faces:
+            face_frame = gray_frame[y:y+h, x:x+w]
+            label, confidence = recognizer.predict(face_frame)
+            if confidence < 50:  # You can adjust the confidence threshold
                 name = "Criminal detected"
                 winsound.Beep(1000, 500)
+            else:
+                name = "Criminal not detected"
 
             print(name)
+
+            # Draw a rectangle around the face
+            cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
 
         cv2.imshow('Video', frame)
 
